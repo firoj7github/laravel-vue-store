@@ -15,7 +15,7 @@
 
   <!-- 🔽 Update Modal -->
 <div
-  v-if="showModal"
+   v-if="showModal"
   class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
 >
   <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
@@ -45,20 +45,25 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref} from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { storeToRefs } from 'pinia';
 
 
+
 const auth = useAuthStore();
 const { user } = storeToRefs(auth);
-onMounted(async ()=>{
+console.log(user);
+onMounted( async()=>{
   await auth.init();
 });
+
+
 
 const showModal = ref(false);
 const editName = ref('');
 const editEmail = ref('');
+
 const handleUpdate= ()=>{
   showModal.value = true;
   editName.value = user.value.name;
@@ -72,6 +77,12 @@ const updateProfile = async()=>{
   })
   showModal.value= false;
 }
+
+
+
+
+
+
 
 
 </script>

@@ -15,6 +15,7 @@
         <div v-if="auth.error?.email" class="text-red-500 text-sm mt-0.5">
       {{ auth.error.email[0] }}
         </div>
+        
         <div>
           <input
             type="password"
@@ -51,12 +52,15 @@ const password = ref('');
 const auth = useAuthStore();
 
 const login = async ()=>{
-  await auth.login(email.value, password.value)
+  await auth.login(email.value, password.value);
   if (auth.token){
     toast.success('Login Successful');
     await router.push('/profile');
   }
 }
+
+
+
 </script>
 
 <style lang="scss" scoped>

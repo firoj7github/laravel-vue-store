@@ -50,6 +50,7 @@ export const useAuthStore = defineStore('auth', {
         }
       }
     },
+    
 
     async profileUpdate (data){
       try{
@@ -62,6 +63,8 @@ export const useAuthStore = defineStore('auth', {
       
 
     },
+
+    
 
     init() {
       if (this.token) {
