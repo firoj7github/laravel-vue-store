@@ -9,8 +9,9 @@
   
           <!-- Desktop Menu -->
           <div class="hidden md:flex space-x-6">
-            
-            <RouterLink v-if="!auth.token" to="/login" class="text-gray-700 hover:text-blue-600 transition">About</RouterLink>
+            <RouterLink to="/product" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Product</RouterLink>
+        <RouterLink to="/sell-item" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sell Item</RouterLink>
+            <RouterLink v-if="!auth.token" to="/login" class="text-gray-700 px-4 py-2 hover:text-blue-600 transition">Login</RouterLink>
             <button v-if="auth.token" @click="handleLogout" class="bg-red-500 text-white px-4 py-2 rounded-xl">
             Logout
            </button>
@@ -29,6 +30,7 @@
   
       <!-- Mobile Menu -->
       <div v-if="menuOpen" class="md:hidden bg-white shadow-md">
+        
         
         <RouterLink to="/login" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">login</RouterLink>
         <button v-if="auth.token" @click="handleLogout" class="bg-red-500 text-white px-4 py-2 rounded-xl">

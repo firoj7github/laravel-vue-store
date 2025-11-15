@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from '../pages/Login.vue';
 import Profile from '../pages/Profile.vue';
+import SellItem from '../pages/SellItem.vue';
+import Product from '../pages/Product.vue';
 import { useAuthStore } from '../stores/auth'; // Import auth store
 
 const routes = [
@@ -27,6 +29,16 @@ const routes = [
       next(); // লগিন থাকলে প্রোফাইল দেখাও
     }
   }
+},
+{
+  path: '/product',
+  component: Product,
+  
+},
+{
+  path: '/sell-item',
+  component: SellItem,
+  
 }
 
 ];

@@ -51,6 +51,8 @@ const email = ref('');
 const password = ref('');
 const auth = useAuthStore();
 
+
+
 const login = async ()=>{
   await auth.login(email.value, password.value);
   if (auth.token){

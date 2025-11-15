@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\LogoutController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SellController;
 use App\Http\Controllers\UpdateProfileController;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
@@ -16,4 +18,7 @@ Route::prefix('auth')->middleware('auth:api')->group(function(){
     Route::post('/logout', [LogoutController::class, 'logout']);
     Route::put('/profile/update', [UpdateProfileController::class, 'update']);
 });
+Route::get('/items', [ProductController::class, 'index']);
+Route::post('/sell', [SellController::class, 'sell']);
+
 

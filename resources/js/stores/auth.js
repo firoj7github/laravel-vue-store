@@ -36,6 +36,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     
+    
 
     async getUser() {
       try {

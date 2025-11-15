@@ -68,6 +68,7 @@ const handleUpdate= ()=>{
   showModal.value = true;
   editName.value = user.value.name;
   editEmail.value = user.value.email;
+  
 }
 
 const updateProfile = async()=>{
