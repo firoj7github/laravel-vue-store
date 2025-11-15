@@ -4,7 +4,8 @@
         <div class="flex justify-between h-16 items-center">
           <!-- Logo -->
           <div class="text-xl font-bold text-blue-600">
-            MyApp
+          <RouterLink to="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-100"> MyApp</RouterLink>
+           
           </div>
   
           <!-- Desktop Menu -->
