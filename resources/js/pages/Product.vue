@@ -13,18 +13,29 @@
   </thead>
 
   <tbody>
-    <tr 
-      v-for="item in items" 
-      :key="item.id"
-      class="hover:bg-gray-50 transition"
-    >
-      <td class="p-3 border-b">{{ item.name }}</td>
-      <td class="p-3 border-b">{{ item.quantity }}</td>
-      <td class="p-3 border-b">{{ item.price }}</td>
-      <td class="p-3 border-b font-semibold">{{ item.total_price }}</td>
+    <!-- items থাকলে -->
+    <template v-if="items.length">
+      <tr 
+        v-for="item in items" 
+        :key="item.id"
+        class="hover:bg-gray-50 transition"
+      >
+        <td class="p-3 border-b">{{ item.name }}</td>
+        <td class="p-3 border-b">{{ item.quantity }}</td>
+        <td class="p-3 border-b">{{ item.price }}</td>
+        <td class="p-3 border-b font-semibold">{{ item.total_price }}</td>
+      </tr>
+    </template>
+
+    <!-- items না থাকলে -->
+    <tr v-else>
+      <td colspan="4" class="text-center text-gray-500 py-4">
+        No products available ( Seeder Implement Need )
+      </td>
     </tr>
   </tbody>
 </table>
+
 
   </div>
 </template>
