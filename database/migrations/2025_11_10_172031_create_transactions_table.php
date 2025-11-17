@@ -17,7 +17,7 @@ return new class extends Migration
         $table->foreignId('item_id')       // foreign key to items table
               ->constrained('products')
               ->onDelete('cascade');
-
+        $table->unsignedBigInteger('lot_id');
         $table->integer('quantity');
         $table->decimal('price', 10, 2);
         $table->decimal('total_price', 10, 2);

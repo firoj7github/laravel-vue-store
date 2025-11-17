@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    protected $fillable = ['item_id', 'name','quantity','price','total_price'];
+    protected $fillable = ['item_id', 'lot_id', 'name','quantity','price','total_price'];
 }

@@ -19,6 +19,6 @@ Route::prefix('auth')->middleware('auth:api')->group(function(){
     Route::put('/profile/update', [UpdateProfileController::class, 'update']);
 });
 Route::get('/items', [ProductController::class, 'index']);
-Route::post('/sell', [SellController::class, 'sell']);
+Route::post('/sell-multiple', [SellController::class, 'sell']);
 
 

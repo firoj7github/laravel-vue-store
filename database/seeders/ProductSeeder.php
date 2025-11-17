@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
+use App\Models\ProductPurchase;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -11,25 +13,69 @@ class ProductSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run()
-{
-    DB::table('products')->insert([
-        [
+    public function run(): void
+    {
+        // Product X
+        $x = Product::create([
             'name' => 'X Item',
-            'quantity' => 100,
-            'price' => 6,
-            'total_price' => 100 * 6,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ],
-        [
+            'quantity' => 0,
+            'price' => 0,
+            'total_price' => 0,
+        ]);
+
+        // Lot 1: 50 pcs × 5 tk
+        ProductPurchase::create([
+            'product_id' => $x->id,
+            'quantity' => 50,
+            'price' => 5,
+            'total_price' => 50 * 5,
+        ]);
+
+        // Lot 2: 50 pcs × 10 tk
+        ProductPurchase::create([
+            'product_id' => $x->id,
+            'quantity' => 50,
+            'price' => 10,
+            'total_price' => 50 * 10,
+        ]);
+
+        // Product Y
+        $y = Product::create([
             'name' => 'Y Item',
+            'quantity' => 0,
+            'price' => 0,
+            'total_price' => 0,
+        ]);
+
+        // Single Lot: 200 pcs × 10 tk
+        ProductPurchase::create([
+            'product_id' => $y->id,
             'quantity' => 200,
             'price' => 10,
             'total_price' => 200 * 10,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ],
-    ]);
-}
+        ]);
+
+
+        // Auto Update Summary (for both products)
+        $this->updateProductSummary($x->id);
+        $this->updateProductSummary($y->id);
+    }
+
+    private function updateProductSummary($productId)
+    {
+        $purchases = ProductPurchase::where('product_id', $productId)->get();
+
+        $totalQty = $purchases->sum('quantity');
+        $totalValue = $purchases->sum(function ($p) {
+            return $p->quantity * $p->price;
+        });
+
+        $avgPrice = $totalQty > 0 ? $totalValue / $totalQty : 0;
+
+        Product::where('id', $productId)->update([
+            'quantity' => $totalQty,
+            'price' => $avgPrice,
+            'total_price' => $totalValue,
+        ]);
+    }
 }

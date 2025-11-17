@@ -2,119 +2,161 @@
   <div class="p-4">
     <h2 class="text-xl font-bold mb-4 text-center">Sell Items</h2>
 
-    <!-- Multi Select -->
-    <label>Select Products Here</label>
+    <label>Select Products</label>
     <multiselect
       v-model="selectedProducts"
       :options="items"
       :multiple="true"
-      :close-on-select="false"
-      :clear-on-select="false"
-      :preserve-search="true"
       label="name"
       track-by="id"
+      @update:modelValue="updateTotalStock"
       placeholder="Select products"
-      class="multiselect"
+      class="multiselect mb-4"
     />
 
-    <!-- Sell Quantity -->
-    <label>Sell Quantity:</label>
-    <input 
-      type="number" 
-      v-model="sellQty" 
-      class="border p-2 w-full mb-3"
-      placeholder="Enter quantity to sell"
-    />
+    <!-- Single Row Table -->
+    <table class="w-full border">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border p-2 text-center">Total Stock</th>
+          <th class="border p-2 text-center">Delivery Qty</th>
+          <th class="border p-2 text-center">Price × Qty</th>
+          <th class="border p-2 text-center">Grand Total Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="border p-2 text-center">{{ totalStock }}</td>
 
-    <!-- Auto Total Price -->
-    <label>Total Price (Auto):</label>
-    <input 
-      type="text" 
-      class="border p-2 w-full mb-3 bg-gray-100"
-      :value="calculatedTotal"
-      readonly
-    />
+          <td class="border p-2 text-center">
+            <input 
+              type="number"
+              v-model.number="deliveryQty"
+              @input="calculatePrice"
+              class="border p-1 w-full text-center"
+              min="0"
+              :max="totalStock"
+            />
+          </td>
 
-    <!-- Submit -->
+          <!-- NEW COLUMN for Price × Qty -->
+          <td class="border p-2 text-left">
+            <ul>
+              <li v-for="(line, i) in breakdown" :key="i">
+                {{ line.name }} — {{ line.qty }} × {{ line.price }} = {{ line.total }}
+              </li>
+            </ul>
+          </td>
+
+          <td class="border p-2 text-center font-bold">
+            {{ grandTotal }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <button 
-      class="bg-blue-600 text-white px-4 py-2 rounded"
-      @click="sellNow"
+      class="bg-blue-600 text-white px-4 py-2 rounded mt-4"
+      @click="submitSell"
     >
       Sell Now
     </button>
+
   </div>
 </template>
-
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 import { useToast } from 'vue-toastification';
 const toast = useToast();
 
-
 const items = ref([]);
-const selectedProducts = ref([]); // multi select
-const sellQty = ref(0);
+const selectedProducts = ref([]);
 
-// Load items from API
+const totalStock = ref(0);
+const deliveryQty = ref(0);
+const grandTotal = ref(0);
+
+const breakdown = ref([]); // NEW ARRAY to show price * qty lines
+
+// Load Items
 const loadItems = async () => {
   const res = await axios.get("/api/items");
   items.value = res.data;
 };
+loadItems();
 
-onMounted(() => loadItems());
+const updateTotalStock = () => {
+  totalStock.value = selectedProducts.value.reduce(
+    (sum, p) => sum + p.quantity,
+    0
+  );
 
-// Calculate Total Price
-const calculatedTotal = computed(() => {
-  if (!selectedProducts.value.length || !sellQty.value) return 0;
-
-  let qty = sellQty.value;
-  let total = 0;
-
-  // FIFO → lowest ID first
-  let sorted = [...selectedProducts.value].sort((a, b) => a.id - b.id);
-
-  for (let item of sorted) {
-    if (qty <= 0) break;
-
-    let take = Math.min(item.quantity, qty);  
-    total += take * item.price;
-    qty -= take;
-  }
-
-  return total;
-});
-
-
-// Submit Sell
-const sellNow = async () => {
-  if (!selectedProducts.value.length || !sellQty.value) {
-    alert("Select product and quantity");
-    return;
-  }
-
-  const selected_ids = selectedProducts.value.map(p => p.id);
-
-  const res = await axios.post("/api/sell", {
-    quantity: sellQty.value,
-    selected_ids, 
-         
-  });
-
-  alert("Sell Done! Total Price = " + res.data.total_price);
-
-  await loadItems();
-  sellQty.value = 0;
-  selectedProducts.value = [];
-  toast.success("Sell Item successfully!");
+  deliveryQty.value = 0;
+  grandTotal.value = 0;
+  breakdown.value = [];
 };
 
-</script>
+// FIFO Price Calculation
+const calculatePrice = () => {
+  let qty = deliveryQty.value;
 
-<style scoped>
-option {
-  padding: 6px;
-}
-</style>
+  // Stock Check
+  if (qty > totalStock.value) {
+    breakdown.value = [];
+    grandTotal.value = 0;
+
+    alert(`You cannot deliver ${qty}. Only ${totalStock.value} in stock.`);
+
+    return; // STOP here
+  }
+
+
+  let total = 0;
+
+  breakdown.value = []; // Reset breakdown
+
+  let sorted = [...selectedProducts.value].sort((a, b) => a.id - b.id);
+
+  sorted.forEach(p => {
+    if (qty <= 0) return;
+
+    const take = Math.min(qty, p.quantity);
+    const lineTotal = take * p.price;
+
+    breakdown.value.push({
+      name: p.name,
+      qty: take,
+      price: p.price,
+      total: lineTotal
+    });
+
+    total += lineTotal;
+    qty -= take;
+  });
+
+  grandTotal.value = total;
+};
+
+// Submit Sell
+const submitSell = async () => {
+  const selected_ids = selectedProducts.value.map(p => p.id);
+
+  const res = await axios.post("/api/sell-multiple", {
+    quantity: deliveryQty.value,
+    selected_ids
+  });
+
+  alert("Sell Completed! Total Price = " + grandTotal.value);
+
+  loadItems();
+  selectedProducts.value = [];
+  totalStock.value = 0;
+  deliveryQty.value = 0;
+  grandTotal.value = 0;
+  breakdown.value = [];
+  toast.success("Sell Item successfully!");
+};
+</script>
