@@ -62,18 +62,25 @@
         </tr>
       </tbody>
     </table>
-<button 
-  class="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-  @click="sellItems"
->
-  Sell Items
-</button>
+    <div class="text-right mt-4 text-lg font-bold">
+  Total Value: {{ finalGrandTotal }}
+</div>
+<div class="text-right">
+  <button 
+    class="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+    @click="sellItems"
+  >
+    Sell Items
+  </button>
+</div>
+
 
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
+import { computed } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
@@ -150,6 +157,10 @@ function calculateFIFO(row) {
 
   row.grandTotal = total;
 }
+
+const finalGrandTotal = computed(() => {
+  return productRows.value.reduce((sum, row) => sum + row.grandTotal, 0);
+});
 
 // SELL API CALL (FINAL FIXED VERSION)
 const sellItems = async () => {
