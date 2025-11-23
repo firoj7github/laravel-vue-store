@@ -76,6 +76,9 @@
 import { ref } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.min.css";
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 
 const items = ref([]);
 const selectedDropdownProduct = ref(null);
@@ -111,6 +114,12 @@ function addProductRow(product) {
 
 // FIFO calculator
 function calculateFIFO(row) {
+
+  if (row.deliveryQty > row.totalStock) {
+    alert(`You cannot deliver more than available stock (${row.totalStock})`);
+    row.deliveryQty = row.totalStock;
+  }
+
   let qty = row.deliveryQty;
   row.breakdown = [];
   row.grandTotal = 0;
@@ -125,13 +134,17 @@ function calculateFIFO(row) {
 
     const take = Math.min(qty, lot.quantity);
 
-    row.breakdown.push({
-      qty: take,
-      price: lot.price,
-      total: take * lot.price
-    });
+    //Skip zero-quantity lots
+    if (take > 0) {
+      row.breakdown.push({
+        qty: take,
+        price: lot.price,
+        total: take * lot.price
+      });
 
-    total += take * lot.price;
+      total += take * lot.price;
+    }
+
     qty -= take;
   });
 
@@ -162,7 +175,9 @@ const sellItems = async () => {
   try {
     const res = await axios.post("/api/sell-items", payload);
 
-    alert("Items sold successfully!");
+    if (!confirm("Are you sure you want to sell these items?")) {
+    return;
+  }
 
     // Refresh items
     const refreshed = await axios.get("/api/items");
@@ -178,10 +193,11 @@ const sellItems = async () => {
         lots: updated.lots,
         deliveryQty: 0,
         breakdown: [],
-        grandTotal: 0
+        grandTotal: 0,
+        
       };
     });
-
+   toast.success("Sell Item successfully!");
   } catch (e) {
     alert("Sell failed: " + e.response?.data?.message);
   }
