@@ -15,6 +15,7 @@ class ProductController extends Controller
                 'id' => $p->id,
                 'name' => $p->name,
                 'quantity' => $p->quantity,
+                'price' => $p->price,
 
                 // All product_purchases as LOTS
                 'lots' => $p->purchases->map(function ($lot) {

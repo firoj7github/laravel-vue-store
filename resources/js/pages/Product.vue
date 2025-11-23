@@ -1,40 +1,39 @@
 <template>
   <div class="p-4">
-    <h2 class="text-xl font-bold mb-3">Items List</h2>
+    <h2 class="text-xl font-bold mb-3 text-center mb-5 mt-3">Items List</h2>
 
-    <table class="w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-  <thead class="bg-gray-100 text-left">
-    <tr>
-      <th class="p-3 border-b">Name</th>
-      <th class="p-3 border-b">Quantity</th>
-      <th class="p-3 border-b">Price</th>
-      <th class="p-3 border-b">Total Price</th>
+    <table class="w-full bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
+  <thead>
+    <tr class="bg-gray-900 text-black text-left">
+      <th class="p-4 text-lg font-bold tracking-wide uppercase">Item Name</th>
+      <th class="p-4 text-lg font-bold tracking-wide uppercase">Total Stock</th>
+      <th class="p-4 text-lg font-bold tracking-wide uppercase">Price</th>
     </tr>
   </thead>
 
   <tbody>
     <!-- items থাকলে -->
     <template v-if="items.length">
-      <tr 
-        v-for="item in items" 
+      <tr
+        v-for="item in items"
         :key="item.id"
-        class="hover:bg-gray-50 transition"
+        class="border-b hover:bg-gray-100 transition even:bg-gray-50"
       >
-        <td class="p-3 border-b">{{ item.name }}</td>
-        <td class="p-3 border-b">{{ item.quantity }}</td>
-        <td class="p-3 border-b">{{ item.price }}</td>
-        <td class="p-3 border-b font-semibold">{{ item.total_price }}</td>
+        <td class="p-4 text-gray-800 font-medium">{{ item.name }}</td>
+        <td class="p-4 text-gray-700">{{ item.quantity }}</td>
+        <td class="p-4 text-gray-700">{{ item.price }}</td>
       </tr>
     </template>
 
     <!-- items না থাকলে -->
     <tr v-else>
-      <td colspan="4" class="text-center text-gray-500 py-4">
-        No products available ( Seeder Implement Need )
+      <td colspan="4" class="text-center text-gray-500 py-6 text-lg">
+        No products available (Seeder Needed)
       </td>
     </tr>
   </tbody>
 </table>
+
 
 
   </div>

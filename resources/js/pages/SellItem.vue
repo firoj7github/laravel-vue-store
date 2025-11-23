@@ -3,13 +3,13 @@
 
     <h2 class="text-xl font-bold mb-4 text-center">Sell Items</h2>
 
-    <label>Select Products</label>
+    <label>Select Items</label>
     <multiselect
       v-model="selectedDropdownProduct"
       :options="items"
       label="name"
       track-by="id"
-      placeholder="Select products"
+      placeholder="Select here"
       class="multiselect mb-4"
       @select="addProductRow"
     />
@@ -18,11 +18,11 @@
     <table class="w-full border">
       <thead>
         <tr class="bg-gray-100">
-          <th class="border p-2 text-center">Product</th>
-          <th class="border p-2 text-center">Total Stock</th>
+          <th class="border p-2 text-center">Item Description</th>
+          <th class="border p-2 text-center">Stock Quantity</th>
           <th class="border p-2 text-center">Delivery Qty</th>
-          <th class="border p-2 text-center">FIFO Breakdown</th>
-          <th class="border p-2 text-center">Grand Total</th>
+          <th class="border p-2 text-center">Price*Qty</th>
+          <th class="border p-2 text-center">Value</th>
         </tr>
       </thead>
 
@@ -52,7 +52,7 @@
 
           <td class="border p-2 text-left">
             <div v-for="(b, index) in row.breakdown" :key="index">
-              Lot {{ index+1 }} → {{ b.qty }} × {{ b.price }} = {{ b.total }}
+             {{ b.qty }} × {{ b.price }} = {{ b.total }}
             </div>
           </td>
 

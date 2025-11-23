@@ -20,40 +20,42 @@ class ProductSeeder extends Seeder
             'name' => 'X Item',
             'quantity' => 0,
             'price' => 0,
-            'total_price' => 0,
-        ]);
+           ]);
 
         // Lot 1: 50 pcs × 5 tk
         ProductPurchase::create([
             'product_id' => $x->id,
             'quantity' => 50,
             'price' => 5,
-            'total_price' => 50 * 5,
-        ]);
+            ]);
 
         // Lot 2: 50 pcs × 10 tk
         ProductPurchase::create([
             'product_id' => $x->id,
             'quantity' => 50,
             'price' => 10,
-            'total_price' => 50 * 10,
-        ]);
+           ]);
 
         // Product Y
         $y = Product::create([
             'name' => 'Y Item',
             'quantity' => 0,
             'price' => 0,
-            'total_price' => 0,
-        ]);
+            ]);
 
-        // Single Lot: 200 pcs × 10 tk
+        // Lot 1: 200 pcs × 10 tk
         ProductPurchase::create([
             'product_id' => $y->id,
-            'quantity' => 200,
+            'quantity' => 100,
             'price' => 10,
-            'total_price' => 200 * 10,
-        ]);
+             ]);
+
+        // Lot 2: 50 pcs × 10 tk
+        ProductPurchase::create([
+            'product_id' => $y->id,
+            'quantity' => 100,
+            'price' => 10,
+           ]);
 
 
         // Auto Update Summary (for both products)
@@ -75,7 +77,6 @@ class ProductSeeder extends Seeder
         Product::where('id', $productId)->update([
             'quantity' => $totalQty,
             'price' => $avgPrice,
-            'total_price' => $totalValue,
         ]);
     }
 }
