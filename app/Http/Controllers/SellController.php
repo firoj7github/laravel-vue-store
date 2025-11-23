@@ -10,102 +10,62 @@ use Illuminate\Support\Facades\DB;
 
 class SellController extends Controller
 {
-    public function sell(Request $request)
+    public function sell(Request $req)
 {
-    $request->validate([
-        'quantity' => 'required|integer|min:1',
-        'selected_ids' => 'required|array|min:1',
-        'selected_ids.*' => 'integer|exists:products,id',
+    $req->validate([
+        'items' => 'required|array',
+        'items.*.product_id' => 'required|exists:products,id',
+        'items.*.quantity' => 'required|integer|min:1',
     ]);
 
-    $sellQty = $request->quantity;
-    $selectedIds = $request->selected_ids;
-    $totalPrice = 0;
+    foreach ($req->items as $sellItem) {
 
-    DB::transaction(function () use (&$totalPrice, $sellQty, $selectedIds) {
+        $product = Product::findOrFail($sellItem['product_id']);
+        $sellQty = $sellItem['quantity'];
 
-        $products = Product::whereIn('id', $selectedIds)
-            ->orderBy('id', 'asc')
-            ->lockForUpdate()
-            ->get();
-
-        // Total stock check
-        $totalStock = ProductPurchase::whereIn('product_id', $selectedIds)->sum('quantity');
-
-        if ($sellQty > $totalStock) {
-            throw new \Exception("Not enough stock! Only $totalStock available.");
+        // Check stock
+        if ($sellQty > $product->quantity) {
+            return response()->json([
+                'message' => "Not enough stock for {$product->name}"
+            ], 400);
         }
 
-        foreach ($products as $product) {
+        // FIFO Lots
+        $lots = ProductPurchase::where('product_id', $product->id)
+            ->where('quantity', '>', 0)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        foreach ($lots as $lot) {
 
             if ($sellQty <= 0) break;
 
-            // FIFO LOTS
-            $lots = ProductPurchase::where('product_id', $product->id)
-                ->where('quantity', '>', 0)
-                ->orderBy('id', 'asc')
-                ->lockForUpdate()
-                ->get();
+            $take = min($sellQty, $lot->quantity);
 
-            foreach ($lots as $lot) {
+            // ↓↓↓ Save transaction ↓↓↓
+            Transaction::create([
+                'item_id' => $product->id,
+                'lot_id' => $lot->id,
+                'quantity' => $take,
+                'price' => $lot->price,
+                'total_price' => $take * $lot->price,
+            ]);
 
-                if ($sellQty <= 0) break;
+            // reduce lot
+            $lot->quantity -= $take;
+            $lot->save();
 
-                $take = min($lot->quantity, $sellQty);
-
-                // Create sale transaction
-                Transaction::create([
-                    'item_id' => $product->id,
-                    'lot_id' => $lot->id,
-                    'quantity' => $take,
-                    'price' => $lot->price, // REAL PURCHASE PRICE
-                    'total_price' => $take * $lot->price,
-                ]);
-
-                // Deduct from LOT
-                $lot->quantity -= $take;
-                $lot->save();
-
-                // Add to total
-                $totalPrice += $take * $lot->price;
-                $sellQty -= $take;
-            }
-
-            // Update product summary
-            $this->updateSummary($product->id);
+            // reduce remaining sell quantity
+            $sellQty -= $take;
         }
-    });
 
-    return response()->json([
-        'success' => true,
-        'total_price' => $totalPrice,
-    ]);
+        // reduce main product stock
+        $product->quantity -= $sellItem['quantity'];
+        $product->save();
+    }
+
+    return response()->json(['message' => 'Products sold successfully']);
 }
-
-
-// PRODUCT SUMMARY UPDATE (very important)
-private function updateSummary($id)
-{
-    // শুধু যেই LOT এ quantity > 0 আছে, সেই লটগুলো ধরবো
-    $purchases = ProductPurchase::where('product_id', $id)
-        ->where('quantity', '>', 0)
-        ->get();
-
-    $totalQty = $purchases->sum('quantity');
-
-    $totalValue = $purchases->sum(function ($p) {
-        return $p->quantity * $p->price;
-    });
-
-    $avgPrice = $totalQty > 0 ? $totalValue / $totalQty : 0;
-
-    Product::where('id', $id)->update([
-        'quantity' => $totalQty,
-        'price' => $avgPrice,   
-        'total_price' => $totalValue,
-    ]);
-}
-
 
 
 

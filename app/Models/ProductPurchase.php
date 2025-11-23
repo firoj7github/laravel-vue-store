@@ -9,7 +9,7 @@ class ProductPurchase extends Model
     protected $fillable = ['product_id', 'quantity', 'price', 'total_price'];
 
     public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
+{
+    return $this->belongsTo(Product::class);
+}
 }

@@ -9,7 +9,7 @@ class Product extends Model
     protected $fillable = ['name', 'quantity', 'price', 'total_price'];
 
     public function purchases()
-    {
-        return $this->hasMany(ProductPurchase::class);
-    }
+{
+    return $this->hasMany(ProductPurchase::class);
+}
 }
